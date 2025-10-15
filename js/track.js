@@ -13,7 +13,7 @@ class Track {
     }
     
     generate() {
-        // Generate center path using bezier curves
+        // Generate center path using Catmull-Rom splines
         const numPoints = 16;
         const radius = 400;
         const centerX = 640;

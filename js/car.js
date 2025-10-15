@@ -39,24 +39,24 @@ class Car {
         };
     }
     
-    update(track) {
+    update(track, deltaTime = 1) {
         // Apply acceleration
         if (this.controls.forward) {
-            this.speed = Math.min(this.speed + this.acceleration, this.maxSpeed);
+            this.speed = Math.min(this.speed + this.acceleration * deltaTime, this.maxSpeed);
         } else if (this.controls.backward) {
             if (this.speed > 0) {
-                this.speed = Math.max(0, this.speed - this.braking);
+                this.speed = Math.max(0, this.speed - this.braking * deltaTime);
             } else {
-                this.speed = Math.max(this.speed - this.acceleration, -this.maxReverseSpeed);
+                this.speed = Math.max(this.speed - this.acceleration * deltaTime, -this.maxReverseSpeed);
             }
         }
         
         // Apply friction
-        this.speed *= this.friction;
+        this.speed *= Math.pow(this.friction, deltaTime);
         
         // Steering (only works when moving)
         if (Math.abs(this.speed) > 0.1) {
-            const turnAmount = this.turnSpeed * (this.speed / this.maxSpeed);
+            const turnAmount = this.turnSpeed * (this.speed / this.maxSpeed) * deltaTime;
             
             if (this.controls.left) {
                 this.angle -= turnAmount;
@@ -69,7 +69,7 @@ class Car {
         // Apply drift
         if (this.controls.drift && Math.abs(this.speed) > 2) {
             this.isDrifting = true;
-            this.speed *= this.driftFactor;
+            this.speed *= Math.pow(this.driftFactor, deltaTime);
         } else {
             this.isDrifting = false;
         }
@@ -78,8 +78,8 @@ class Car {
         const oldX = this.x;
         const oldY = this.y;
         
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
+        this.x += Math.cos(this.angle) * this.speed * deltaTime;
+        this.y += Math.sin(this.angle) * this.speed * deltaTime;
         
         // Check collision with track boundaries
         if (!track.isOnTrack(this.x, this.y)) {

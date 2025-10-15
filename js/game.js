@@ -13,6 +13,8 @@ class Game {
         this.aiControllers = [];
         this.totalLaps = 3;
         this.raceStartTime = 0;
+        this.lastFrameTime = 0;
+        this.deltaTime = 0;
         
         // Input handling
         this.keys = {};
@@ -80,6 +82,7 @@ class Game {
         
         // Reset race time
         this.raceStartTime = Date.now();
+        this.lastFrameTime = 0;
         
         // Start game loop
         this.gameLoop();
@@ -117,6 +120,12 @@ class Game {
     gameLoop() {
         if (this.state !== 'racing') return;
         
+        // Calculate delta time for frame rate independence
+        const currentTime = performance.now();
+        this.deltaTime = this.lastFrameTime ? (currentTime - this.lastFrameTime) / 16.67 : 1;
+        this.deltaTime = Math.min(this.deltaTime, 3); // Clamp to prevent huge jumps
+        this.lastFrameTime = currentTime;
+        
         this.update();
         this.render();
         this.updateUI();
@@ -133,9 +142,9 @@ class Game {
             ai.update(this.cars);
         }
         
-        // Update all cars
+        // Update all cars with delta time for frame rate independence
         for (const car of this.cars) {
-            car.update(this.track);
+            car.update(this.track, this.deltaTime);
         }
         
         // Check race completion
